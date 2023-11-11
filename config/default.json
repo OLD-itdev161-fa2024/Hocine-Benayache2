@@ -1,3 +1,4 @@
 {
-    "mongoURI": "mongodb+srv://benayach1:Jijel2023@cluster0.kf3friv.mongodb.net/?retryWrites=true&w=majority"
+    "mongoURI": "mongodb+srv://benayach1:Jijel2023@cluster0.kf3friv.mongodb.net/?retryWrites=true&w=majority",
+    "jwtSecret": "maytheforcebewithyou"
 }
