@@ -9,7 +9,40 @@ class App extends React.Component {
 
 
   state = {
-    data: null
+    data: null,
+    token: null,
+    user: null
+  }
+
+  authenticateUser = () => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      localStorage.removeItem('user')
+      this.setState({ user: null });
+    }
+    if (token) {
+      const config = {
+        headers: {
+          'x-auth-token': token
+        }
+      }
+      axios.get('http://localhost:5000/api/auth', config)
+        .then((response) => {
+          localStorage.setItem('user', response.data.name)
+          this.setState({ user: response.data.name })
+        })
+        .catch((error) => {
+          localStorage.removeItem('user');
+          this.setState({ user: null });
+          console.error(`Error logging in: ${error}`);
+        })
+    }
+  }
+
+  logOut = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    this.setState({ token: null, user: null });
   }
 
   componentDidMount() {
@@ -22,13 +55,18 @@ class App extends React.Component {
             console.error(`Error fetching data: ${error}`)
           })
       })
+    this.authenticateUser();
   }
   render() {
+    let { user, data } = this.state;
+    const authProps = {
+      authenticateUser: this.authenticateUser
+    }
 
     return (
       <Router>
         <div className='App'>
-          <header className='App-header'>
+        <header className='App-header'>
             <h1>GoodThings</h1>
             <ul>
               <li>
@@ -38,17 +76,34 @@ class App extends React.Component {
                 <Link to="/register">Register</Link>
               </li>
               <li>
-                <Link to="/login">Login</Link>
+              {user ? 
+                <Link to="" onClick = {this.logOut}>Log Out</Link> :
+                <Link to="/login">Log in</Link>
+              }
+
               </li>
             </ul>
           </header>
           <main>
             <Route exact path="/">
-              {this.state.data}
+
+              {user ?
+              <React.Fragment>
+                <div>Hello {user}!</div>
+                <div>{data}</div>
+              </React.Fragment>                  :
+              <React.Fragment>
+                Please Register or Login
+              </React.Fragment>
+              }
             </Route>
             <Switch>
-              <Route path="/register" component={Register} />
-              <Route path="/login" component={Login} />
+              <Route 
+              path="/register"
+               render={() => <Register {...authProps} />} />
+              <Route 
+              path="/login"
+              render={() => <Login {...authProps} />} />
             </Switch>
           </main>
         </div>
